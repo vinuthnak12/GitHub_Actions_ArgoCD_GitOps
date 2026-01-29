@@ -13,6 +13,8 @@ env:
     ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
     ARGOCD_USERNAME: ${{ secrets.ARGOCD_USERNAME }}
     ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
+    GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+    GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -71,5 +73,17 @@ jobs:
                     --username ${{ secrets.ARGOCD_USERNAME }} \
                     --password ${{ secrets.ARGOCD_PASSWORD }} \
                     --insecure
+
+            - name: Commit and Push Updated deployment.yaml
+              run: |
+                git config user.name "${{ secrets.GIT_USERNAME }}"
+                git config user.email "${{ secrets.GIT_EMAIL }}"
+                git remote set-url origin https://$GIT_USERNAME:$PERSONAL_ACCESS_TOKEN@github.com/${{ github.repository }}.git
+                git fetch origin
+                git checkout main
+                git pull origin main
+                git add .
+                git commit -m "Update image to my-app:${{ github.sha }}"
+                git push origin main
             
      
